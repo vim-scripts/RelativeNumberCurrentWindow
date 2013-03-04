@@ -1,0 +1,33 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=4461
+
+DESCRIPTION
+The 'relativenumber' setting helps you use the [count] for even quicker
+navigation and manipulation, but it's only useful in the current window, where
+the cursor is. For all other windows, the absolute line numbers offer a better
+orientation (e.g. when you have the same buffer in splits above and below your
+current window, and you need to decide which contains a location you want to
+go to).
+
+This plugin sets up autocmds to show relative numbers only in the current
+window, and switches them to absolute numbers when the window is left. Windows
+that do not have 'relativenumber' set are left as-is.
+
+SEE ALSO
+- The CursorLineCurrentWindow plugin (vimscript #4178) enables the
+  'cursorline' setting only for the current window.
+
+RELATED WORKS
+- RelOps (vimscript #4212) switches to relative numbering only when in
+  operator-pending mode.
+- vim-numbertoggle (http://jeffkreeftmeijer.com/2012/relative-line-numbers-in-vim-for-super-fast-movement/)
+  turns off relative numbering in insert mode, or when the focus is lost.
+- numbers.vim (https://github.com/myusuf3/numbers.vim) will alternate between
+  relative numbering in normal mode and absolute in insert mode.
+
+USAGE
+Globally enable 'relativenumber' in your vimrc via
+    :set relativenumber
+After sourcing this plugin, 'relativenumber' will only be active for the
+current window. So with multiple split windows, only one of them, the one
+where the cursor is in, will have the 'relativenumber'; all others will have
+'number' set.
