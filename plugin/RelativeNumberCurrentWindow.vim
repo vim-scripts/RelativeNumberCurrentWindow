@@ -2,12 +2,18 @@
 "
 " DEPENDENCIES:
 "
-" Copyright: (C) 2012-2013 Ingo Karkat
+" Copyright: (C) 2012-2015 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.10.005	05-Jan-2015	Plugin was broken by Vim 7.3.861, which fixed
+"				the resetting of 'rnu' when 'nu' is set. Add
+"				implementation that omits the workaround.
+"				Handle combination of 'nu' and 'rnu' that
+"				results in different current line display since
+"				7.3.1115.
 "   1.00.004	04-Mar-2013	Fix completely losing line numbering on
 "				:EditNext; :setlocal number also resets the
 "				global 'relativenumber' value; we need to avoid
@@ -48,6 +54,24 @@ endif
 function! s:LocalNumber()
     return (&l:relativenumber ? 2 : (&l:number ? 1 : 0))
 endfunction
+
+if v:version == 703 && has('patch861') || v:version > 703
+function! s:RelativeNumberOnEnter()
+"****D echomsg '****' bufnr('').'/'.winnr() s:LocalNumber() exists('w:relativenumber')
+    if exists('w:relativenumber') && s:LocalNumber() == 1
+	setlocal relativenumber
+	let &l:number = w:relativenumber
+    endif
+endfunction
+function! s:RelativeNumberOnLeave()
+    if s:LocalNumber() == 2
+	let w:relativenumber = &l:number    " Store the 'number' option that configures how the current relative line is displayed (:help number_relativenumber).
+	setlocal norelativenumber number
+    else
+	unlet! w:relativenumber
+    endif
+endfunction
+else
 function! s:RelativeNumberOnEnter()
 "****D echomsg '****' bufnr('').'/'.winnr() s:LocalNumber() exists('w:relativenumber')
     if exists('w:relativenumber') && s:LocalNumber() == 1
@@ -56,9 +80,10 @@ function! s:RelativeNumberOnEnter()
 endfunction
 function! s:RelativeNumberOnLeave()
     if s:LocalNumber() == 2
-	" Switching locally to 'number' also resets the global 'relativenumber';
-	" we don't want this; on some :edits (especially through my :EditNext),
-	" the line numbering is completely lost due to this.
+	" XXX: Switching locally to 'number' also resets the global
+	" 'relativenumber'; we don't want this; on some :edits (especially
+	" through my :EditNext), the line numbering is completely lost due to
+	" this.
 	let l:global_relativenumber = &g:relativenumber
 	    setlocal number
 	let &g:relativenumber = l:global_relativenumber
@@ -67,6 +92,7 @@ function! s:RelativeNumberOnLeave()
 	unlet! w:relativenumber
     endif
 endfunction
+endif
 
 function! s:AdaptNumberwidth()
     let &l:numberwidth = max([len(string(&lines)), len(string(line('$')))]) + 1
